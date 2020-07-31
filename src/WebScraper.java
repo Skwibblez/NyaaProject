@@ -67,7 +67,7 @@ public class WebScraper extends Tools{
 	
 	//Pass in a title and identify title + episode number + subgroup
 	//Some titles in the future might be weird af would need to modify this
-	public static Torrent parseTitle(String inputTitle, Torrent inputTorrent){
+	public static Torrent parseTitleWrong(String inputTitle, Torrent inputTorrent){
 		
 		//Constants
 		final int space = 32;
@@ -159,6 +159,80 @@ public class WebScraper extends Tools{
 		return inputTorrent;
 	}
 	
+	public static void parseTitle(String inputTitle, Torrent inputTorrent){
+		
+		//Constants
+		String qual = null;
+		String qualities[] = {"360p", "480p", "720p", "1080p"};
+		final String leadingBracket = "[";
+		final String endingBracket = "]";
+		String subGroup = "";
+		String title = "";
+		int counter = 0;
+		boolean appendSub = false, appendTitle = false;
+		
+		//Gets quality
+		for(int i = 0; i < qualities.length; i++){
+			if(inputTitle.contains(qualities[i])){
+				qual = qualities[i];
+			}else{
+				//printStr("Does not contain " + qualities[i]);
+			}
+		}
+		
+		//Gets episode number
+		String num = "";
+		int epNumIndex = inputTitle.indexOf("-");
+		//printStr("Index: " + inputTitle.indexOf("-"));
+		for(int i = epNumIndex +2; i < inputTitle.length(); i++){
+			char thisChar = inputTitle.charAt(i);
+			if(thisChar >= 48 && thisChar <= 57){
+				num+= thisChar;
+			}else{
+				break;
+			}
+		}
+		
+		//SubGroup + title
+		for(int i = 0; i < epNumIndex-1; i++){
+			String currentChar = ""+inputTitle.charAt(i);
+			if(currentChar.equals(endingBracket)){
+				counter++;
+				i++;	//Assume next char is space
+				appendTitle = true;
+				appendSub = false;
+				continue;
+			}
+			
+			if(appendSub){
+				subGroup+=currentChar;
+			}
+			
+			if(appendTitle){
+				title+=currentChar;
+			}
+			
+			if(currentChar.equals(leadingBracket)){
+				if(appendSub == false && counter == 0){
+					appendSub = true;
+				}
+			}
+		}
+		
+		//Set attr
+		inputTorrent.title = title;
+		inputTorrent.episode = Integer.parseInt(num);
+		inputTorrent.quality = qual;
+		inputTorrent.subGroup = subGroup;
+		
+		//Debug
+		printStr("In function title: " + inputTorrent.title);
+		printStr("In function episode: " + inputTorrent.episode);
+		printStr("In function qual: " + inputTorrent.quality);
+		printStr("In function subgroup: " + inputTorrent.subGroup);
+		
+		
+	}
 	//This class should create torrent objects and append to an arraylist
 	public static void updateTorrent(String searchTerm){
 		if(searchTerm.toLowerCase().equals("update")){
@@ -212,7 +286,7 @@ public class WebScraper extends Tools{
 					printStr(baseUrl + test3.attr("href"));
 					torrentUrl = baseUrl + test3.attr("href");
 					Torrent newTorrent = new Torrent(torrentTitle, torrentUrl);
-					newTorrent = parseTitle(torrentTitle, newTorrent);	//Adds 
+					parseTitle(torrentTitle, newTorrent);	//Adds 
 					printStr("Subgroup: " +newTorrent.subGroup);				
 					myList.add(newTorrent);
 					//THIS LINE BE CAREFUL
