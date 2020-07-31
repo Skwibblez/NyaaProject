@@ -19,6 +19,7 @@ public class Test extends WebScraper {
 		//updateTorrent();
 		//ArrayList<Torrent> myTorrents = new ArrayList<Torrent>();
 		//webPage("https://www.google.com/");
+		ArrayList<Torrent> myList = new ArrayList<Torrent>();
 		updateTorrent();
 	}
 
