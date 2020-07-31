@@ -29,4 +29,10 @@ public class Tools {
 		}
 	}
 	
+	public static void printListStr(ArrayList list){
+		for(int i = 0; i < list.size(); i++){
+			printStr("Search Item: " + i + "-- " + list.get(i));
+		}
+	}
+	
 }

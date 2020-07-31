@@ -20,6 +20,14 @@ public class Torrent {
 		this.title = title;
 		this.url = url;
 	}
+	public Torrent(String url, String quality, String title, int episode, String subGroup){
+		this.url = url;
+		this.quality = quality;
+		this.title = title;
+		this.episode = episode;
+		this.subGroup = subGroup;
+		
+	}
 	
 	
 	public Torrent(String url, String quality, String title, String subGroup, int size, int seeders, int leechers, String lastUpdated, int downloads){
@@ -54,6 +62,34 @@ public class Torrent {
 	public int getSize(){
 		return this.size;
 	}
+	
+	//Setters
+	public void setUrl(String url){
+		this.url = url;
+	}
+	
+	public void setQuality(String quality){
+		this.quality = quality;
+	}
+	
+	public void setTitle(String title){
+		this.title = title;
+	}
+	
+	public void setSub(String sub){
+		this.subGroup = sub;
+	}
+	
+	public void setEpisode(int episode){
+		this.episode = episode;
+	}
+	
+	
+	
+	
+	
+
+			
 	
 	
 }
