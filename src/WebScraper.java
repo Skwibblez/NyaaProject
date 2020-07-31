@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 
+
 //Examples(Retrieving title
 //String titleSelector1 = "body > div > div.table-responsive > table > tbody > tr:nth-child(" + Integer.toString(i) + ") > td:nth-child(2) > a";
 //String titleSelector2 = "body > div > div.table-responsive > table > tbody > tr:nth-child(" + Integer.toString(i) + ") > td:nth-child(2) > a:nth-child(2)";
@@ -36,14 +37,12 @@ public class WebScraper extends Tools{
 	
 	//Useless main here
 	public static void main(String[] args) {
-		updateTorrent();
+		getTorrent();
 		
 		//File Writing Functionality
 		String fileName1 = "testing";
 		String fileName = "nyaaTorrents.txt";
-		//writeFile(fileName1);
-		
-			
+		//writeFile(fileName1);		
 		//File Writing	
 			
 		/*try{
@@ -65,102 +64,7 @@ public class WebScraper extends Tools{
 		}	*/	
 	}
 	
-	//Pass in a title and identify title + episode number + subgroup
-	//Some titles in the future might be weird af would need to modify this
-	public static Torrent parseTitleWrong(String inputTitle, Torrent inputTorrent){
-		
-		//Constants
-		final int space = 32;
-		final int dash = 45;
-		final String leadingBracket = "[";
-		final String endingBracket = "]";
-
-		//Get sub group first
-		String subGroup = "";
-		String qual = "";
-		String title = "";
-		String num = "";
-		
-		boolean appendSub = false;
-		boolean appendQuality = false;
-		boolean appendTitle = false;
-		
-		int counter = 0;
-		
-		for(int i = inputTitle.length()-1; i >= 0; i--){
-			String currentChar = ""+inputTitle.charAt(i);
-			
-			//Ends appending of quality || sub group
-			if(currentChar.equals(leadingBracket)){
-				appendSub = false;
-				appendQuality = false;
-				counter++;
-				i--;	//Skips over the space
-				continue;
-			}
-			
-			//Construct quality string
-			if(appendQuality){
-				qual = currentChar + qual;
-			}
-			
-			//Construct subGroup string
-			if(appendSub){
-				subGroup = currentChar + subGroup;
-			}	
-			
-			//Stop appending episodeNumber string
-			if(counter == 1 && inputTitle.charAt(i) == space){
-				counter++;
-			}
-			
-			//Construct episode number string
-			if(counter == 1){
-				num = currentChar + num;
-			}
-			
-			//Start quality && subGroup string
-			if(currentChar.equals(endingBracket)){
-				appendTitle = false;
-				if(counter == 0){
-					appendQuality = true;
-				}else{
-					appendSub = true;
-				}
-			}
-			
-			//Allow title string to start appending
-			if(inputTitle.charAt(i) == dash && counter == 2 && appendTitle == false){
-				i--;
-				appendTitle = true;
-				continue;
-			}
-			
-			//Construct title string
-			if(appendTitle){
-				title = currentChar + title;
-			}
-		}
-		
-		//Truncating
-		title = title.substring(1,title.length());
-		
-		//Set attr
-		inputTorrent.subGroup = subGroup;
-		inputTorrent.quality = qual;
-		inputTorrent.title = title;
-		inputTorrent.episode = Integer.parseInt(num);
-		
-		//Debug
-//		printStr("In function title: " + title);
-//		printStr("In function episode: " + num);
-//		printStr("In function qual: " + inputTorrent.quality);
-//		printStr("In function subgroup: " + inputTorrent.subGroup);	
-		return inputTorrent;
-	}
-	
 	public static void parseTitle(String inputTitle, Torrent inputTorrent){
-		
 		//Constants		
 		final String leadingBracket = "[";
 		final String endingBracket = "]";
@@ -195,8 +99,8 @@ public class WebScraper extends Tools{
 		inputTorrent.setSub(subGroup);
 		
 		//Debug
-		printStr("In function title: " + inputTorrent.title);
-		printStr("In function subgroup: " + inputTorrent.subGroup);	
+//		printStr("In function title: " + inputTorrent.title);
+//		printStr("In function subgroup: " + inputTorrent.subGroup);	
 	}//end subGroup + title parsing
 	
 	//Get quality of current object
@@ -240,7 +144,7 @@ public class WebScraper extends Tools{
 	
 	//This class should create torrent objects and append to an arraylist
 	//Can accept no arguments if simply updating
-	public static void updateTorrent(String searchTerm, int inputQuality, int startRange, int endRange){
+	public static void getTorrent(String searchTerm, int inputQuality, int startRange, int endRange){
 		//This string is going to be changed based on user search
 		String url = "https://nyaa.si/?f=2&c=1_2&q=" + searchTerm;
 		printStr("Search url: " + url);
@@ -256,6 +160,7 @@ public class WebScraper extends Tools{
 		int currentEpisodeNum = 2000;
 		int parsedEpisodeNumber;
 		boolean normalize = false;
+		
 		//ArrayList
 		ArrayList<Torrent> myList = new ArrayList<Torrent>();
 		//Fetch html doc
@@ -264,10 +169,10 @@ public class WebScraper extends Tools{
 	
 			//Max entries = 75/page? 
 			//for(int i = 0 ; i < maxEntries; i++){
-			for(int i = 0 ; i < 40; i++){
-				titleSelector1 = queryTitleFirst + Integer.toString(i) + queryTitleLast1;
-				titleSelector2 =queryTitleFirst + Integer.toString(i) + queryTitleLast2;
-				linkSelector = queryLinkFirst + Integer.toString(i) + queryLinkLast;				
+			for(int i = 0 ; i < maxEntries; i++){
+				titleSelector1 = queryTitleFirst + Integer.toString(i+1) + queryTitleLast1;
+				titleSelector2 =queryTitleFirst + Integer.toString(i+1) + queryTitleLast2;
+				linkSelector = queryLinkFirst + Integer.toString(i+1) + queryLinkLast;				
 				
 				Elements test1 = doc.select(titleSelector1);
 				Elements test2 = doc.select(titleSelector2);
@@ -275,13 +180,18 @@ public class WebScraper extends Tools{
 				
 				//Logic faulty here
 				//Title
+				if(test1.text().equals("") && test2.text().equals("")){
+					printStr("No results found");
+					printStr(titleSelector1);
+					printStr(titleSelector2);
+					break;
+				}
 				if(!test1.text().equals("")){	//Check for blank string
-					//printStr("Test1: " + test1.text());
+					printStr("Test1: " + test1.text());
 					printStr(test1.text());
-					torrentTitle = test1.text();
-					
+					torrentTitle = test1.text();			
 				}else{
-					printStr(test2.text());
+					printStr("Test2: " +test2.text());
 					torrentTitle = test2.text();	
 				}
 				
@@ -293,7 +203,7 @@ public class WebScraper extends Tools{
 					//If correct quality -> parse rest of information
 					if(parsedEpisodeNumber == currentEpisodeNum ){
 						torrentQuality = parseQuality(torrentTitle);	//Quality obtained
-						if(torrentQuality.equals(desiredQuality) || torrentQuality.equals("000p")){
+						if(torrentQuality.equals(desiredQuality) ){ //||torrentQuality.equals("000p")){
 							//Parse rest of information -- do this now		
 							Torrent newTorrent = new Torrent();
 							//Set attr(quality | url | title | episode | subgroup)
@@ -303,6 +213,9 @@ public class WebScraper extends Tools{
 							parseTitle(torrentTitle, newTorrent);	//Subgroup and real title
 							myList.add(newTorrent);
 							currentEpisodeNum--;
+							//Reset parameters
+							torrentQuality = "";
+							parsedEpisodeNumber = -1;
 							printStr("ADDED!\n");
 							//THIS LINE BE CAREFUL - goes through all the links
 							//webPage(torrentUrl);}
@@ -311,16 +224,19 @@ public class WebScraper extends Tools{
 							continue;
 						}	
 					}else{	//Incorrect episode number + normalizing
-						printStr("SKIPPING episode " + parsedEpisodeNumber + " not desired.\n");
-						if(currentEpisodeNum >= parsedEpisodeNumber && normalize == false){
+						printStr("SKIPPING episode " + parsedEpisodeNumber + " not desired want " + currentEpisodeNum + ".\n");
+						if(currentEpisodeNum >= parsedEpisodeNumber && normalize == false && parsedEpisodeNumber != -1){
 							normalize = true;
 							printStr("Normalized from " + currentEpisodeNum + " to " + parsedEpisodeNumber + "\n");
 							currentEpisodeNum = parsedEpisodeNumber;
 							i--;
 						}
+						if(currentEpisodeNum == 0){
+							printStr("Episode 0 reached - done searching!\n");
+							break;
+						}
 						continue;
-					}
-											
+					}									
 				}else{
 					//Do nothing
 					//test(3);
@@ -336,31 +252,31 @@ public class WebScraper extends Tools{
 	}
 	
 	//First two used for random anime -- not very useful
-	public static void updateTorrent(){
-		updateTorrent("",720,1,12);
+	public static void getTorrent(){
+		getTorrent("",720,1,12);
 	}
 	
 	//Makes sense for random anime
-	public static void updateTorrent(int quality){
+	public static void getTorrent(int quality){
 		if(quality != 360 || quality!= 480 || quality != 720 || quality != 1080){
 			printStr("Quality not accepted - defaulting to 720\n");
 			quality = 720;
 		}
-		updateTorrent("", quality,1,12);
+		getTorrent("", quality,1,12);
 	}
 	
 	//Default to 720p
-	public static void updateTorrent(String searchTerm){
-		updateTorrent(searchTerm, 720, 1, 12);
+	public static void getTorrent(String searchTerm){
+		getTorrent(searchTerm, 720, 1, 12);
 	}
-	public static void updateTorrent(int start, int end){
-		updateTorrent("", 720, start, end);
+	public static void getTorrent(int start, int end){
+		getTorrent("", 720, start, end);
 	}
-	public static void updateTorrent(String searchTerm, int start, int end){
-		updateTorrent(searchTerm, 720, start, end);
+	public static void getTorrent(String searchTerm, int start, int end){
+		getTorrent(searchTerm, 720, start, end);
 	}
 	
-	
+	//Goes to the url to start dl
 	public static void webPage(String url){
 		try{		
 			URI uri = new URI(url);

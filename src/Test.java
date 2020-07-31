@@ -1,5 +1,7 @@
 import org.jsoup.Jsoup;
 
+import java.awt.Robot;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -17,30 +19,42 @@ import java.time.*;
 
 public class Test extends WebScraper {
 	public static void main(String[] args){
-		//updateTorrent();
+		//getTorrent();
 		//ArrayList<Torrent> myTorrents = new ArrayList<Torrent>();
 		//webPage("https://www.google.com/");
 		long startTime = System.currentTimeMillis();	
 		
 		ArrayList<String> searchList = new ArrayList<String>();
 		ArrayList<Torrent> myList = new ArrayList<Torrent>();
+		//Automatically press enter for me (test here)
+		try{
+			Robot r = new Robot();
+			r.keyPress(KeyEvent.VK_CONTROL);
+			r.keyRelease(KeyEvent.VK_CONTROL);
+		}catch(Exception e){
+			printStr("Owari da");
+		}
+		
 		
 		//Input 
 		Scanner scanner = new Scanner(System.in);
 		printStr("Search Anime Torrent: ");
-	    String readString = scanner.nextLine();
+	    String readString = " ";
 	    int counter = 0;
-	    while(readString!=null) {
-	    	printStr("Counter " + counter);
+	    //Can definitely optimize this scanner
+	    //while(readString!=null) {
+	    while(!readString.isEmpty()) {
+	    	//printStr("Counter " + counter);
 	        //System.out.println(readString);
-
 	        if (readString.isEmpty()) {
 	            printStr("Enter detected");
 	            break;
 	        }
-
-	        if (scanner.hasNextLine()) {        	
+	        if(scanner.hasNextLine()) {        	
 	            readString = scanner.nextLine();
+	            if(readString.equals("")){
+	            	break;
+	            }
 	            searchList.add(readString);
 	            printStr(readString + " added to search!");
 	        } else {
@@ -53,15 +67,14 @@ public class Test extends WebScraper {
 	    printListStr(searchList);
 	    //Account for the "Enter"
 	    if(searchList.size() > 0){
-	    	searchList.remove(searchList.size()-1);
 	    	//Run main function
 		    String searchArg;
 		    for(int i = 0; i < searchList.size(); i++){
 		    	searchArg = searchList.get(i);
-		    	updateTorrent(searchArg);
+		    	getTorrent(searchArg);
 		    }
 	    }else{
-	    	updateTorrent();
+	    	getTorrent();
 	    }
 	    
 	    
